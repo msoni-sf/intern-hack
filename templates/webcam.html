@@ -15,6 +15,11 @@
       integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4"
       crossorigin="anonymous"
     ></script>
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.js"
+      integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+      crossorigin="anonymous"
+    ></script>
     <title>Webcam</title>
   </head>
   <body>
@@ -24,7 +29,7 @@
       </div>
     </div>
 
-    <div class="row p-3 m-5">
+    <div class="row p-3 m-5 text-center">
       <div class="col-6 border border-secondary">
         <div class="row">
           <div class="col-12">
@@ -65,7 +70,7 @@
 
     <div class="row">
       <div class="col-12 text-center">
-        <button class="btn btn-success btn-lg">Done</button>
+        <button class="btn btn-success btn-lg" onclick="send()">Done</button>
       </div>
     </div>
     <script src="{{ url_for('static', filename='webcam.js') }}"></script>

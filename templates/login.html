@@ -20,18 +20,18 @@
   <body>
     <div class="row text-center p-2 display-3 bg-primary text-light">
       <div class="col-12">
-        Log In
+        Welcome
       </div>
     </div>
     <div class="row m-5">
       <div class="col-5 mx-auto text-center border border-secondary">
-        <form class="m-3 p-1">
+        <form class="m-3 p-1" method="post" action="{{ url_for('login') }}">
           <div class="row m-3">
             <div class="col-4">
               <label for="uname" class="col-form-label">Username</label>
             </div>
             <div class="col-8">
-              <input type="text" id="uname" class="form-control" />
+              <input type="text" id="uname" name="uname" class="form-control" />
             </div>
           </div>
           <div class="row m-3">
@@ -40,6 +40,7 @@
             </div>
             <div class="col-8">
               <input
+                name="pass"
                 type="password"
                 id="pass"
                 class="form-control"
@@ -47,7 +48,22 @@
               />
             </div>
           </div>
-          <button type="submit" class="btn btn-primary m-3">Submit</button>
+          <button
+            type="submit"
+            name="type"
+            value="login"
+            class="btn btn-primary m-3"
+          >
+            Login
+          </button>
+          <button
+            type="submit"
+            name="type"
+            value="register"
+            class="btn btn-primary m-3"
+          >
+            Register
+          </button>
         </form>
       </div>
     </div>

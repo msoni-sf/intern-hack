@@ -39,6 +39,37 @@ async function stop() {
   }
 }
 
+// capture image
 function capture() {
   context.drawImage(video, 0, 0, 320, 240);
+}
+
+function dataURLtoBlob(dataURL) {
+  let array, binary, i, len;
+  binary = atob(dataURL.split(",")[1]);
+  array = [];
+  i = 0;
+  len = binary.length;
+  while (i < len) {
+    array.push(binary.charCodeAt(i));
+    i++;
+  }
+  return new Blob([new Uint8Array(array)], {
+    type: "image/png",
+  });
+}
+
+// send image
+function send() {
+  var myFormData = new FormData();
+  myFormData.append("img", dataURLtoBlob(canvas.toDataURL()));
+
+  $.ajax({
+    url: "/api/webcam_auth",
+    type: "POST",
+    processData: false, // important
+    contentType: false, // important
+    dataType: "json",
+    data: myFormData,
+  });
 }
