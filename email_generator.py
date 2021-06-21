@@ -9,7 +9,7 @@ def generateOTP() :
     for i in range(6) :
         OTP += digits[math.floor(random.random() * 10)]
     return OTP
-    
+
 
 def email_alert(subject, body, to):
 	msg = EmailMessage()
@@ -24,6 +24,7 @@ def email_alert(subject, body, to):
 	server.login(user, password)
 	server.send_message(msg)
 	server.quit()
-	
-getotp = generateOTP();
-email_alert('One-time OTP for Inern-Hackathon Project', 'Hey user, your OTP is as folloes: '+getotp, 'sharan6ruchika@gmail.com')
+
+if __name__ == '__main__':
+    getotp = generateOTP();
+    email_alert('One-time OTP for Inern-Hackathon Project', 'Hey user, your OTP is as follows: '+getotp, 'manansoni1399@gmail.com')

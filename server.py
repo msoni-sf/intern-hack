@@ -4,6 +4,7 @@ import bcrypt
 from pprint import pprint
 import json
 from matching import is_matching
+from email_generator import generateOTP, email_alert
 
 master_secret_key = 'a nice and random master secret key'
 app = Flask(__name__)
@@ -48,6 +49,10 @@ def webcam_page(uname):
 def photo_add_page(uname):
     return render_template('photo_add.html', uname=uname)
 
+@app.route('/otp/<uname>', methods=['GET'])
+def otp_page(uname):
+    return render_template('otp.html', uname=uname)
+
 ## Backend APIs
 @app.route('/api/logout/<uname>', methods=['GET'])
 def logout(uname):
@@ -62,6 +67,7 @@ def login():
     type = request.form['type']
     uname = request.form.get('uname')
     password = request.form.get('pass')
+    email = request.form.get('email')
 
     if type == 'register':
         if uname in users:
@@ -69,6 +75,7 @@ def login():
         else:
             users[uname] = {
                 'name': uname,
+                'email': email,
                 'pass': bcrypt.hashpw((password + master_secret_key).encode(), bcrypt.gensalt()).decode(),
                 'logged_in': True,
                 'num_photos': 0,
@@ -146,6 +153,25 @@ def photo_add():
             'message': '',
             'redirect': f'/home/{uname}',
         }
+
+@app.route('/api/otp_generate/<uname>', methods=['GET'])
+def otp_generate(uname):
+    otp = generateOTP()
+    users[uname]['otp'] = otp
+    email_alert('One-time OTP for Inern-Hackathon Project', 'Hey user, your OTP is as follows: ' + otp, users[uname]['email'])
+    return redirect(url_for('otp_page', uname=uname))
+
+@app.route('/api/otp_verify', methods=['POST'])
+def otp_auth():
+    otp = request.form['otp']
+    uname = request.form['uname']
+    print(otp)
+    print(users[uname])
+    if otp == users[uname]['otp']:
+        return redirect(url_for('home_page', uname=uname))
+    else:
+        render_template('error.html', message='Incorrect OTP', callback='webcam_page', uname=uname)
+
 
 ## Run server
 if __name__ == '__main__':

@@ -57,13 +57,21 @@
     </div>
 
     <div class="row m-5 p-3 text-center">
-      <div class="col-6">
+      <div class="col-4">
         <button class="btn btn-primary" onclick="capture()">Capture</button>
       </div>
-      <div class="col-6">
+      <div class="col-4">
         <button class="btn btn-success btn-lg" onclick="send()">
           Authorize
         </button>
+      </div>
+      <div class="col-4">
+        <a
+          class="btn btn-success btn-lg"
+          href="{{ url_for('otp_generate', uname=uname) }}"
+        >
+          Get OTP
+        </a>
       </div>
     </div>
 
