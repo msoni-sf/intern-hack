@@ -25,7 +25,7 @@
   <body>
     <div class="row text-center p-2 display-3 bg-primary text-light">
       <div class="col-12">
-        Webcam Login
+        Add photo
       </div>
     </div>
 
@@ -62,7 +62,7 @@
       </div>
       <div class="col-6">
         <button class="btn btn-success btn-lg" onclick="send()">
-          Authorize
+          Add
         </button>
       </div>
     </div>
@@ -70,6 +70,6 @@
     <script>
       const uname = "{{uname}}";
     </script>
-    <script src="{{ url_for('static', filename='webcam_auth.js') }}"></script>
+    <script src="{{ url_for('static', filename='webcam_add.js') }}"></script>
   </body>
 </html>

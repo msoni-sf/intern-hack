@@ -63,13 +63,28 @@ function dataURLtoBlob(dataURL) {
 function send() {
   var myFormData = new FormData();
   myFormData.append("img", dataURLtoBlob(canvas.toDataURL()));
+  myFormData.append("uname", uname);
 
   $.ajax({
-    url: "/api/webcam_auth",
+    url: "/api/photo_add",
     type: "POST",
     processData: false, // important
     contentType: false, // important
     dataType: "json",
     data: myFormData,
-  });
+  }) // The response is passed to the function
+    .done(function (json) {
+      console.log(json);
+      if (json.error) {
+        alert(json.message);
+      }
+      window.location = json.redirect;
+    })
+    .fail(function (xhr, status, errorThrown) {
+      alert("Sorry, there was a problem!");
+    });
 }
+
+$(function () {
+  start(); // start on page load
+});

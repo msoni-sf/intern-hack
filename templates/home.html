@@ -32,14 +32,15 @@
       </div>
     </div>
     <div class="row m-5">
-      <div class="col-4 text-center">
-        <button class="btn btn-primary">Add a photo</button>
+      <div class="col-6 text-center">
+        <a
+          class="btn btn-primary"
+          href="{{ url_for('photo_add_page', uname=uname) }}"
+          >Add a photo</a
+        >
       </div>
-      <div class="col-4 text-center">
-        <button class="btn btn-primary">Remove a photo</button>
-      </div>
-      <div class="col-4 text-center">
-        <button class="btn btn-primary">View all photos</button>
+      <div class="col-6 text-center">
+        <a class="btn btn-primary" href="#">View all photos</a>
       </div>
     </div>
   </body>

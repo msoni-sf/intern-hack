@@ -2,20 +2,31 @@ from flask import Flask, render_template, url_for, redirect, request
 import os
 import bcrypt
 from pprint import pprint
+import json
+from matching import is_matching
 
 master_secret_key = 'a nice and random master secret key'
+app = Flask(__name__)
 
 if not os.path.exists('photos'):
     os.mkdir('photos')
 
-app = Flask(__name__)
 users = dict()
-THRESH = 0.5
+
+try:
+    with open('database.db') as f:
+        users = json.load(f)
+    for user in users:
+        users[user]['logged_in'] = False
+except:
+    pass
+
+THRESH = 0.7
 
 ## Show frontend pages
 @app.route('/', methods=['GET'])
 def login_page():
-    pprint(users)
+    #pprint(users)
     return render_template('login.html')
 
 @app.route('/home/<uname>', methods=['GET'])
@@ -29,9 +40,13 @@ def home_page(uname):
 def settings_page():
     return render_template('settings.html')
 
-@app.route('/webcam', methods=['GET'])
-def webcam_page():
-    return render_template('webcam.html')
+@app.route('/webcam/<uname>', methods=['GET'])
+def webcam_page(uname):
+    return render_template('webcam.html', uname=uname)
+
+@app.route('/add_photo/<uname>', methods=['GET'])
+def photo_add_page(uname):
+    return render_template('photo_add.html', uname=uname)
 
 ## Backend APIs
 @app.route('/api/logout/<uname>', methods=['GET'])
@@ -54,33 +69,83 @@ def login():
         else:
             users[uname] = {
                 'name': uname,
-                'pass': bcrypt.hashpw((password + master_secret_key).encode(), bcrypt.gensalt()),
+                'pass': bcrypt.hashpw((password + master_secret_key).encode(), bcrypt.gensalt()).decode(),
                 'logged_in': True,
                 'num_photos': 0,
             }
-            return redirect(url_for('home_page',uname=uname))
+            with open('database.db','w') as f:
+                json.dump(users, f, indent=4)
+
+            return redirect(url_for('webcam_page',uname=uname))
 
     elif type == 'login':
         if uname not in users:
             return render_template('error.html', message='User does not exist. Please register instead', callback='login_page', uname=None)
         else:
-            if bcrypt.checkpw((password+master_secret_key).encode(), users[uname]['pass']):
+            if bcrypt.checkpw((password+master_secret_key).encode(), users[uname]['pass'].encode()):
                 users[uname]['logged_in'] = True
-                return redirect(url_for('home_page', uname=uname))
+                return redirect(url_for('webcam_page', uname=uname))
             else:
                 return render_template('error.html', message='Password doesn\'t match', callback='login_page', uname=None)
 
-@app.route('/api/webcam_auth/<uname>', methods=['POST'])
-def webcam_auth(uname):
+@app.route('/api/webcam_auth', methods=['POST'])
+def webcam_auth():
+    uname = request.form['uname']
     if uname not in users:
-        return render_template('error.html', message='User does not exist', callback='webcam_page', uname=None)
+        return {
+            'error': True,
+            'message': 'User does not exist',
+            'redirect': '/',
+        }
     elif users[uname]['num_photos'] == 0:
-        pass # go to add photos page
+        return {
+            'error': True,
+            'message': 'You have not added any photos. Please add a photo to enable 2FA',
+            'redirect': f'/home/{uname}',
+        }
     else:
         file = request.files['img']
-        file.save(f'photos/users/tmp.jpeg')
+        file.save(f'photos/{uname}/tmp.jpeg')
 
-    return redirect(url_for('home_page'))
+        for id in range(users[uname]['num_photos']):
+            if is_matching(f'photos/{uname}/{id}.jpeg', f'photos/{uname}/tmp.jpeg', THRESH):
+                return {
+                    'error': False,
+                    'message': '',
+                    'redirect': f'/home/{uname}',
+                }
+
+        return {
+            'error': True,
+            'message': 'Could not authenticate. Make sure your face is clearly visible',
+            'redirect': f'/home/{uname}',
+        }
+
+@app.route('/api/photo_add', methods=['POST'])
+def photo_add():
+    uname = request.form['uname']
+    if uname not in users:
+        return {
+            'error': True,
+            'message': 'User does not exist',
+            'redirect': f'/home/{uname}',
+        }
+    else:
+        if not os.path.exists(f'photos/{uname}'):
+            os.mkdir(f'photos/{uname}')
+
+        file = request.files['img']
+        file.save(f'photos/{uname}/{users[uname]["num_photos"]}.jpeg')
+        users[uname]["num_photos"] += 1
+
+        with open('database.db','w') as f:
+            json.dump(users, f, indent=4)
+
+        return {
+            'error': False,
+            'message': '',
+            'redirect': f'/home/{uname}',
+        }
 
 ## Run server
 if __name__ == '__main__':
