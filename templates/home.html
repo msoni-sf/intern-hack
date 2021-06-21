@@ -18,22 +18,29 @@
     <title>Home</title>
   </head>
   <body>
-    <div class="row text-center p-2 display-3 bg-primary text-light">
-      <div class="col-10">
+    <div class="row text-center p-2 bg-primary text-light p-3">
+      <div class="col-9 display-3">
         Home
       </div>
-      <div class="col-1 text-dark">
-        <a href="{{ url_for('settings_page')}}">
-          <img
-            class="img-fluid"
-            src="{{ url_for('static', filename='settings.png') }}"
-            alt="settings"
-          />
+      <div class="col-2 m-auto display-5">
+        Welcome {{uname}}
+      </div>
+      <div class="col-1 text-dark bg-light m-auto p-2">
+        <a href="{{ url_for('logout', uname=uname) }}">
+          Log out
         </a>
       </div>
     </div>
     <div class="row m-5">
-      <div class="col-12 text-center"></div>
+      <div class="col-4 text-center">
+        <button class="btn btn-primary">Add a photo</button>
+      </div>
+      <div class="col-4 text-center">
+        <button class="btn btn-primary">Remove a photo</button>
+      </div>
+      <div class="col-4 text-center">
+        <button class="btn btn-primary">View all photos</button>
+      </div>
     </div>
   </body>
 </html>

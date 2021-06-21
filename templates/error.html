@@ -20,9 +20,15 @@
   <body>
     <div class="row text-center p-2 display-3 bg-danger text-light">
       <div class="col-1">
+        {% if uname %}
+        <a href="{{ url_for(callback, uname=uname)}}" class="text-light">
+          <small>Back</small>
+        </a>
+        {% else %}
         <a href="{{ url_for(callback)}}" class="text-light">
           <small>Back</small>
         </a>
+        {% endif %}
       </div>
       <div class="col-11">
         Error

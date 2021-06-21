@@ -1,7 +1,7 @@
 import face_recognition
 
 
-def is_matching(img1, img2):
+def is_matching(img1, img2, thresh):
     """
     :param img1: imgage 1 path
     :param img2: image 2 path
@@ -15,7 +15,7 @@ def is_matching(img1, img2):
     image_2_encoding = face_recognition.face_encodings(image_2)[0]
 
     face_distance = face_recognition.face_distance([image_1_encoding], image_2_encoding)[0]
-    return face_distance <= 0.5
+    return face_distance <= thresh
 
 
 # print(is_matching("obama.jpg","obama2.jpg"))
