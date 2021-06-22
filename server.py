@@ -125,18 +125,17 @@ def webcam_auth():
             'redirect': '/',
         }
     elif users[uname]['num_photos'] == 0:
-        users[uname]['auth'] = True
         return {
             'error': True,
-            'message': 'You have not added any photos. Please add a photo to enable 2FA',
-            'redirect': f'/home/{uname}',
+            'message': 'Please add a photo to enable webcam auth. For this time, you can use an OTP',
+            'redirect': f'/webcam/{uname}',
         }
     else:
-        file = request.files['img']
-        file.save(f'static/photos/{uname}/tmp.jpeg')
+        for name,file in request.files.items():
+            file.save(f'static/photos/{uname}/tmp-{name.split("-")[-1]}.jpeg')
 
         for id in range(users[uname]['num_photos']):
-            if is_matching(f'static/photos/{uname}/{id}.jpeg', f'static/photos/{uname}/tmp.jpeg', THRESH):
+            if is_matching(f'static/photos/{uname}/{id}.jpeg', f'static/photos/{uname}/tmp-0.jpeg', THRESH):
                 users[uname]['auth'] = True
                 return {
                     'error': False,
@@ -183,7 +182,7 @@ def otp_generate(uname):
     else:
         otp = generateOTP()
         users[uname]['otp'] = otp
-        email_alert('One-time OTP for Inern-Hackathon Project', 'Hey user, your OTP is as follows: ' + otp, users[uname]['email'])
+        email_alert('One-time OTP for Inern-Hackathon Project', f'Hey {users[uname]["name"]}, your OTP is {otp}', users[uname]['email'])
         return redirect(url_for('otp_page', uname=uname))
 
 @app.route('/api/otp_verify', methods=['POST'])
@@ -193,6 +192,7 @@ def otp_auth():
     if uname not in users:
         return render_template('error.html', message='User does not exist', callback='otp_page', uname=uname)
     elif otp == users[uname]['otp']:
+        users[uname]['auth'] = True
         return redirect(url_for('home_page', uname=uname))
     else:
         return render_template('error.html', message='Incorrect OTP', callback='otp_page', uname=uname)

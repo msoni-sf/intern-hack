@@ -3,6 +3,8 @@
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
 var context = canvas.getContext("2d");
+var myFormData = new FormData();
+var num = 0;
 
 const constraints = {
   audio: false,
@@ -39,9 +41,19 @@ async function stop() {
   }
 }
 
+function capture_many() {
+  let num = 0;
+  setInterval(capture, 100);
+}
+
 // capture image
 function capture() {
-  context.drawImage(video, 0, 0, 320, 240);
+  if (num < 10) {
+    console.log(num);
+    context.drawImage(video, 0, 0, 320, 240);
+    myFormData.append(`img-${num}`, dataURLtoBlob(canvas.toDataURL()));
+    num = num + 1;
+  }
 }
 
 function dataURLtoBlob(dataURL) {
@@ -61,8 +73,6 @@ function dataURLtoBlob(dataURL) {
 
 // send image
 function send() {
-  var myFormData = new FormData();
-  myFormData.append("img", dataURLtoBlob(canvas.toDataURL()));
   myFormData.append("uname", uname);
 
   $.ajax({
