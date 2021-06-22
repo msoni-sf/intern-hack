@@ -1,0 +1,5 @@
+Pillow
+keras
+tensorflow
+imutils
+tqdm
