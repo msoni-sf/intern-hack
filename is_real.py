@@ -197,4 +197,4 @@ def is_real(images,true_img) :
 
     return False
 
-print(is_real(['download (1).jpeg','download (1).jpeg','download (1).jpeg','download (1).jpeg','1655305.0.jpg','download (1).jpeg','download (1).jpeg'],'download.jpeg'))
+#print(is_real(['download (1).jpeg','download (1).jpeg','download (1).jpeg','download (1).jpeg','1655305.0.jpg','download (1).jpeg','download (1).jpeg'],'download.jpeg'))
