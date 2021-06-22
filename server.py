@@ -30,13 +30,23 @@ THRESH = 0.7
 
 ## Show frontend pages
 @app.route('/', methods=['GET'])
+def index_page():
+    #pprint(users)
+    return render_template('index.html')
+
+@app.route('/login', methods=['GET'])
 def login_page():
     #pprint(users)
     return render_template('login.html')
 
+@app.route('/register', methods=['GET'])
+def register_page():
+    #pprint(users)
+    return render_template('register.html')
+
 @app.route('/home/<uname>', methods=['GET'])
 def home_page(uname):
-    if uname not in users or not users[uname]['logged_in']:
+    if uname not in users or not users[uname]['logged_in'] or not users[uname]['auth']:
         return render_template('error.html', message='User does not exist or not logged in', callback='login_page', uname=None)
     else:
         return render_template('home.html', uname=uname)
@@ -65,10 +75,11 @@ def otp_page(uname):
 @app.route('/api/logout/<uname>', methods=['GET'])
 def logout(uname):
     if uname not in users:
-        return render_template('error.html', message='User does not exist', callback='login_page', uname=uname)
+        return render_template('error.html', message='User does not exist', callback='index_page', uname=uname)
 
     users[uname]['logged_in'] = False
-    return redirect(url_for('login_page'))
+    users[uname]['auth'] = False
+    return redirect(url_for('index_page'))
 
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -79,13 +90,14 @@ def login():
 
     if type == 'register':
         if uname in users:
-            return render_template('error.html', message='User already exists. Please login instead', callback='login_page', uname=None)
+            return render_template('error.html', message='User already exists. Please login instead', callback='index_page', uname=None)
         else:
             users[uname] = {
                 'name': uname,
                 'email': email,
                 'pass': bcrypt.hashpw((password + master_secret_key).encode(), bcrypt.gensalt()).decode(),
                 'logged_in': True,
+                'auth': False,
                 'num_photos': 0,
             }
             with open('database.db','w') as f:
@@ -95,7 +107,7 @@ def login():
 
     elif type == 'login':
         if uname not in users:
-            return render_template('error.html', message='User does not exist. Please register instead', callback='login_page', uname=None)
+            return render_template('error.html', message='User does not exist. Please register instead', callback='index_page', uname=None)
         else:
             if bcrypt.checkpw((password+master_secret_key).encode(), users[uname]['pass'].encode()):
                 users[uname]['logged_in'] = True
@@ -113,6 +125,7 @@ def webcam_auth():
             'redirect': '/',
         }
     elif users[uname]['num_photos'] == 0:
+        users[uname]['auth'] = True
         return {
             'error': True,
             'message': 'You have not added any photos. Please add a photo to enable 2FA',
@@ -124,6 +137,7 @@ def webcam_auth():
 
         for id in range(users[uname]['num_photos']):
             if is_matching(f'static/photos/{uname}/{id}.jpeg', f'static/photos/{uname}/tmp.jpeg', THRESH):
+                users[uname]['auth'] = True
                 return {
                     'error': False,
                     'message': '',
