@@ -20,7 +20,7 @@
       integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
       crossorigin="anonymous"
     ></script>
-    <title>Webcam</title>
+    <title>View all photos</title>
   </head>
   <body>
     <div class="row text-center p-2 bg-primary text-light">
@@ -32,51 +32,25 @@
         >
       </div>
       <div class="col-11 display-3">
-        Add photo
+        View all photos
       </div>
     </div>
 
     <div class="row p-3 m-5 text-center">
-      <div class="col-6 border border-secondary">
-        <div class="row">
-          <div class="col-12">
-            Live Feed
+      <div class="col-12">
+        {% if num == 0 %} No photos added {% else %} {% for i in range(num) %}
+        <div class="card" style="width: 18rem;">
+          <img
+            src="{{ url_for('static', filename='photos/manan/' + i|string + '.jpeg') }}"
+            class="card-img-top"
+            alt="..."
+          />
+          <div class="card-body">
+            <h5 class="card-title">{{i}}.jpeg</h5>
           </div>
         </div>
-        <div class="row">
-          <div class="col-12">
-            <video id="video" playsinline autoplay></video>
-          </div>
-        </div>
-      </div>
-      <div class="col-6 border border-secondary">
-        <div class="row">
-          <div class="col-12">
-            Screenshot
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-12">
-            <canvas id="canvas" width="320" height="240"></canvas>
-          </div>
-        </div>
+        {% endfor %} {%endif%}
       </div>
     </div>
-
-    <div class="row m-5 p-3 text-center">
-      <div class="col-6">
-        <button class="btn btn-primary" onclick="capture()">Capture</button>
-      </div>
-      <div class="col-6">
-        <button class="btn btn-success btn-lg" onclick="send()">
-          Add
-        </button>
-      </div>
-    </div>
-
-    <script>
-      const uname = "{{uname}}";
-    </script>
-    <script src="{{ url_for('static', filename='webcam_add.js') }}"></script>
   </body>
 </html>

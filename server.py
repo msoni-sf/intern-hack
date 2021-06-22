@@ -5,12 +5,16 @@ from pprint import pprint
 import json
 from matching import is_matching
 from email_generator import generateOTP, email_alert
+import io
+from base64 import encodebytes
+from PIL import Image
+from flask import jsonify
 
 master_secret_key = 'a nice and random master secret key'
 app = Flask(__name__)
 
-if not os.path.exists('photos'):
-    os.mkdir('photos')
+if not os.path.exists('static/photos'):
+    os.mkdir('static/photos')
 
 users = dict()
 
@@ -49,9 +53,13 @@ def webcam_page(uname):
 def photo_add_page(uname):
     return render_template('photo_add.html', uname=uname)
 
+@app.route('/show_photo/<uname>', methods=['GET'])
+def photo_show_page(uname):
+    return render_template('photo_show.html', uname=uname,num=users[uname]['num_photos'])
+
 @app.route('/otp/<uname>', methods=['GET'])
 def otp_page(uname):
-    return render_template('otp.html', uname=uname)
+    return render_template('otp.html', uname=uname,)
 
 ## Backend APIs
 @app.route('/api/logout/<uname>', methods=['GET'])
@@ -112,10 +120,10 @@ def webcam_auth():
         }
     else:
         file = request.files['img']
-        file.save(f'photos/{uname}/tmp.jpeg')
+        file.save(f'static/photos/{uname}/tmp.jpeg')
 
         for id in range(users[uname]['num_photos']):
-            if is_matching(f'photos/{uname}/{id}.jpeg', f'photos/{uname}/tmp.jpeg', THRESH):
+            if is_matching(f'static/photos/{uname}/{id}.jpeg', f'static/photos/{uname}/tmp.jpeg', THRESH):
                 return {
                     'error': False,
                     'message': '',
@@ -125,7 +133,7 @@ def webcam_auth():
         return {
             'error': True,
             'message': 'Could not authenticate. Make sure your face is clearly visible',
-            'redirect': f'/home/{uname}',
+            'redirect': f'/webcam/{uname}',
         }
 
 @app.route('/api/photo_add', methods=['POST'])
@@ -138,11 +146,11 @@ def photo_add():
             'redirect': f'/home/{uname}',
         }
     else:
-        if not os.path.exists(f'photos/{uname}'):
-            os.mkdir(f'photos/{uname}')
+        if not os.path.exists(f'static/photos/{uname}'):
+            os.mkdir(f'static/photos/{uname}')
 
         file = request.files['img']
-        file.save(f'photos/{uname}/{users[uname]["num_photos"]}.jpeg')
+        file.save(f'static/photos/{uname}/{users[uname]["num_photos"]}.jpeg')
         users[uname]["num_photos"] += 1
 
         with open('database.db','w') as f:
@@ -156,22 +164,38 @@ def photo_add():
 
 @app.route('/api/otp_generate/<uname>', methods=['GET'])
 def otp_generate(uname):
-    otp = generateOTP()
-    users[uname]['otp'] = otp
-    email_alert('One-time OTP for Inern-Hackathon Project', 'Hey user, your OTP is as follows: ' + otp, users[uname]['email'])
-    return redirect(url_for('otp_page', uname=uname))
+    if uname not in users:
+        return render_template('error.html', message='User does not exist', callback='webcam_page', uname=uname)
+    else:
+        otp = generateOTP()
+        users[uname]['otp'] = otp
+        email_alert('One-time OTP for Inern-Hackathon Project', 'Hey user, your OTP is as follows: ' + otp, users[uname]['email'])
+        return redirect(url_for('otp_page', uname=uname))
 
 @app.route('/api/otp_verify', methods=['POST'])
 def otp_auth():
     otp = request.form['otp']
     uname = request.form['uname']
-    print(otp)
-    print(users[uname])
-    if otp == users[uname]['otp']:
+    if uname not in users:
+        return render_template('error.html', message='User does not exist', callback='otp_page', uname=uname)
+    elif otp == users[uname]['otp']:
         return redirect(url_for('home_page', uname=uname))
     else:
-        render_template('error.html', message='Incorrect OTP', callback='webcam_page', uname=uname)
+        return render_template('error.html', message='Incorrect OTP', callback='otp_page', uname=uname)
 
+def get_response_image(image_path):
+    pil_img = Image.open(image_path, mode='r') # reads the PIL image
+    byte_arr = io.BytesIO()
+    pil_img.save(byte_arr, format='PNG') # convert the PIL image to byte array
+    encoded_img = encodebytes(byte_arr.getvalue()).decode('ascii') # encode as base64
+    return encoded_img
+
+@app.route('/api/imgs/<uname>',methods=['GET'])
+def get_images(uname):
+    encoded_imges = []
+    for id in range(users[uname]['num_photos']):
+        encoded_imges.append(get_response_image(f'static/photos/{uname}/{id}.jpeg'))
+    return jsonify({'result': encoded_imges})
 
 ## Run server
 if __name__ == '__main__':

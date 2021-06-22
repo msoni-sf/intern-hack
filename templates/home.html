@@ -40,7 +40,11 @@
         >
       </div>
       <div class="col-6 text-center">
-        <a class="btn btn-primary" href="#">View all photos</a>
+        <a
+          class="btn btn-primary"
+          href="{{ url_for('photo_show_page', uname=uname) }}"
+          >View all photos</a
+        >
       </div>
     </div>
   </body>
