@@ -15,19 +15,27 @@
       integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4"
       crossorigin="anonymous"
     ></script>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+
     <title>Home</title>
   </head>
   <body>
-    <div class="row text-center p-2 bg-primary text-light p-3">
-      <div class="col-9 display-3">
-        Home
+    <div
+      style="background: #4d4d4d;"
+      class="row text-center p-2 text-light p-3"
+    >
+      <div class="col-6 display-3">
+        Test area
       </div>
-      <div class="col-2 m-auto display-5">
+      <div class="col-3 m-auto display-5">
         Welcome {{uname}}
       </div>
-      <div class="col-1 text-dark bg-light m-auto p-2">
+      <div class="col-1 text-danger bg-danger m-auto p-2">
         <a href="{{ url_for('logout', uname=uname) }}">
-          Log out
+          End test
         </a>
       </div>
     </div>

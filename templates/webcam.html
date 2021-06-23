@@ -25,26 +25,37 @@
   <body>
     <div class="row text-center p-2 display-3 bg-primary text-light">
       <div class="col-12">
-        Webcam Login
+        Webcam
       </div>
     </div>
 
     <div class="row p-3 m-5 text-center">
-      <div class="col-6 border border-secondary">
+      <div class="col-6 border border-dark p-5 pt-0">
         <div class="row">
-          <div class="col-12">
+          <div class="col-12 display-5">
             Live Feed
           </div>
         </div>
         <div class="row">
           <div class="col-12">
-            <video id="video" playsinline autoplay></video>
+            <div class="row">
+              <div class="col-12">
+                <video id="video" playsinline autoplay></video>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-12">
+                <button class="btn btn-primary" onclick="capture()">
+                  Capture
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="col-6 border border-secondary">
+      <div class="col-6 border border-dark p-5 pt-0">
         <div class="row">
-          <div class="col-12">
+          <div class="col-12 display-4">
             Screenshot
           </div>
         </div>
@@ -57,15 +68,29 @@
     </div>
 
     <div class="row m-5 p-3 text-center">
-      <div class="col-4">
-        <button class="btn btn-primary" onclick="capture()">Capture</button>
+      {% if login %}
+      <div class="col-6 mx-auto">
+        <div class="row">
+          <div class="col-12">
+            <button class="btn btn-success btn-lg" onclick="send()">
+              Authorize
+            </button>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12 mt-5 align-right">
+            Issues with authorization:
+            <a
+              class="btn btn-success text-light btn-sm"
+              href="{{ url_for('otp_generate', uname=uname) }}"
+            >
+              <small>get OTP</small>
+            </a>
+          </div>
+        </div>
       </div>
-      <div class="col-4">
-        <button class="btn btn-success btn-lg" onclick="send()">
-          Authorize
-        </button>
-      </div>
-      <div class="col-4">
+      {% else %}
+      <div class="col-6 mx-auto">
         <a
           class="btn btn-success btn-lg"
           href="{{ url_for('otp_generate', uname=uname) }}"
@@ -73,8 +98,8 @@
           Get OTP
         </a>
       </div>
+      {% endif %}
     </div>
-
     <script>
       const uname = "{{uname}}";
     </script>

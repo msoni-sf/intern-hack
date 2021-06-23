@@ -32,17 +32,17 @@ THRESH = 0.7
 @app.route('/', methods=['GET'])
 def index_page():
     #pprint(users)
-    return render_template('index.html')
+    return render_template('login2.html')
 
 @app.route('/login', methods=['GET'])
 def login_page():
     #pprint(users)
-    return render_template('login.html')
+    return render_template('login2.html')
 
 @app.route('/register', methods=['GET'])
 def register_page():
     #pprint(users)
-    return render_template('register.html')
+    return render_template('register2.html')
 
 @app.route('/home/<uname>', methods=['GET'])
 def home_page(uname):
@@ -55,9 +55,9 @@ def home_page(uname):
 def settings_page():
     return render_template('settings.html')
 
-@app.route('/webcam/<uname>', methods=['GET'])
-def webcam_page(uname):
-    return render_template('webcam.html', uname=uname)
+@app.route('/webcam/<uname>/<login>', methods=['GET'])
+def webcam_page(uname,login):
+    return render_template('webcam.html', uname=uname, login=login)
 
 @app.route('/add_photo/<uname>', methods=['GET'])
 def photo_add_page(uname):
@@ -92,6 +92,7 @@ def login():
         if uname in users:
             return render_template('error.html', message='User already exists. Please login instead', callback='index_page', uname=None)
         else:
+            print(uname,email,password)
             users[uname] = {
                 'name': uname,
                 'email': email,
@@ -103,7 +104,7 @@ def login():
             with open('database.db','w') as f:
                 json.dump(users, f, indent=4)
 
-            return redirect(url_for('webcam_page',uname=uname))
+            return redirect(url_for('webcam_page',uname=uname, login=False))
 
     elif type == 'login':
         if uname not in users:
@@ -111,7 +112,7 @@ def login():
         else:
             if bcrypt.checkpw((password+master_secret_key).encode(), users[uname]['pass'].encode()):
                 users[uname]['logged_in'] = True
-                return redirect(url_for('webcam_page', uname=uname))
+                return redirect(url_for('webcam_page', uname=uname, login=True))
             else:
                 return render_template('error.html', message='Password doesn\'t match', callback='login_page', uname=None)
 
