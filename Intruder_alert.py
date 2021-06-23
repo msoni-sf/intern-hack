@@ -16,7 +16,7 @@ def SendMail(ImgFileName, subject, body, to):
     msg['From'] = user
     msg['To'] = to
 
-    text = MIMEText("alert")
+    text = MIMEText(body)
     msg.attach(text)
     image = MIMEImage(img_data, name=os.path.basename(ImgFileName))
     msg.attach(image)
@@ -29,4 +29,5 @@ def SendMail(ImgFileName, subject, body, to):
     s.send_message(msg, user, to)
     s.quit()
 
-SendMail('pic1.png', "Intruder-alert", "Hey user, This person, tried to log-in", 'sharan6ruchika@gmail.com')
+if __name__ == '__main__':
+    SendMail('pic1.png', "Intruder-alert", "Hey user, This person, tried to log-in", 'sharan6ruchika@gmail.com')

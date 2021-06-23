@@ -5,6 +5,7 @@ from pprint import pprint
 import json
 from matching import is_matching
 from email_generator import generateOTP, email_alert
+from Intruder_alert import SendMail
 import io
 from base64 import encodebytes
 from PIL import Image
@@ -27,7 +28,7 @@ try:
 except:
     pass
 
-THRESH = 0.7
+THRESH = 0.5
 
 ## Show frontend pages
 @app.route('/', methods=['GET'])
@@ -94,7 +95,6 @@ def login():
         if uname in users:
             return render_template('error.html', message='User already exists. Please login instead', callback='index_page', uname=None)
         else:
-            print(uname,email,password)
             users[uname] = {
                 'name': uname,
                 'email': email,
@@ -131,10 +131,20 @@ def webcam_auth():
             'redirect': '/',
         }
     elif users[uname]['num_photos'] == 0:
+        if not os.path.exists(f'static/photos/{uname}'):
+            os.mkdir(f'static/photos/{uname}')
+
+        file = request.files['img']
+        file.save(f'static/photos/{uname}/{users[uname]["num_photos"]}.jpeg')
+        users[uname]["num_photos"] += 1
         users[uname]['auth'] = True
+
+        with open('database.db','w') as f:
+            json.dump(users, f, indent=4)
+
         return {
-            'error': True,
-            'message': 'You have not added any photos. Please add a photo to enable 2FA',
+            'error': False,
+            'message': '',
             'redirect': f'/home/{uname}',
         }
     else:
@@ -149,12 +159,16 @@ def webcam_auth():
                     'message': '',
                     'redirect': f'/home/{uname}',
                 }
-
-        return {
-            'error': True,
-            'message': 'Could not authenticate. Make sure your face is clearly visible',
-            'redirect': f'/webcam/{uname}',
-        }
+            else:
+                SendMail(f'static/photos/{uname}/tmp.jpeg',
+                             'Intruder Alert',
+                             f'Hey {uname}, An unauthorized person tried to log-in to your account. Please review your account activity',
+                             users[uname]['email'])
+                return {
+                    'error': True,
+                    'message': 'Could not authenticate. Make sure your face is clearly visible',
+                    'redirect': '/',
+                }
 
 @app.route('/api/photo_add', methods=['POST'])
 def photo_add():
