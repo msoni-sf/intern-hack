@@ -17,6 +17,7 @@ if not os.path.exists('static/photos'):
     os.mkdir('static/photos')
 
 users = dict()
+logged_in_users = set()
 
 try:
     with open('database.db') as f:
@@ -79,6 +80,7 @@ def logout(uname):
 
     users[uname]['logged_in'] = False
     users[uname]['auth'] = False
+    logged_in_users.remove(uname)
     return redirect(url_for('index_page'))
 
 @app.route('/api/login', methods=['POST'])
@@ -109,9 +111,12 @@ def login():
     elif type == 'login':
         if uname not in users:
             return render_template('error.html', message='User does not exist. Please register instead', callback='index_page', uname=None)
+        elif uname in logged_in_users:
+            return render_template('error.html', message='User already logged in. Please logout of all tabs / devices and relogin', callback='index_page', uname=None)
         else:
             if bcrypt.checkpw((password+master_secret_key).encode(), users[uname]['pass'].encode()):
                 users[uname]['logged_in'] = True
+                logged_in_users.add(uname)
                 return redirect(url_for('webcam_page', uname=uname, login=True))
             else:
                 return render_template('error.html', message='Password doesn\'t match', callback='login_page', uname=None)
