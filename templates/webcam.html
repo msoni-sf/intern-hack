@@ -20,6 +20,11 @@
       integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
       crossorigin="anonymous"
     ></script>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+
     <title>Webcam</title>
   </head>
   <body>
@@ -30,7 +35,7 @@
     </div>
 
     <div class="row p-3 m-5 text-center">
-      <div class="col-6 border border-dark p-5 pt-0">
+      <div class="col-6 border border-light text-light p-5 pt-0">
         <div class="row">
           <div class="col-12 display-5">
             Live Feed
@@ -53,7 +58,7 @@
           </div>
         </div>
       </div>
-      <div class="col-6 border border-dark p-5 pt-0">
+      <div class="col-6 border border-light text-light p-5 pt-0">
         <div class="row">
           <div class="col-12 display-4">
             Screenshot
@@ -78,7 +83,7 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-12 mt-5 align-right">
+          <div class="col-12 mt-5 align-right text-light">
             Issues with authorization:
             <a
               class="btn btn-success text-light btn-sm"

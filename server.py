@@ -106,6 +106,7 @@ def login():
                 'start_time': None,
                 'last_seen': None
             }
+            logged_in_users.add(uname)
             with open('database.db','w') as f:
                 json.dump(users, f, indent=4)
 
@@ -165,6 +166,7 @@ def webcam_auth():
                     'redirect': f'/home/{uname}',
                 }
             else:
+                users[uname]['logged_in'] = False
                 SendMail(f'static/photos/{uname}/tmp.jpeg',
                              'Intruder Alert',
                              f'Hey {uname}, An unauthorized person tried to log-in to your account. Please review your account activity',
@@ -277,4 +279,4 @@ def webcam_test():
 if __name__ == '__main__':
     app.jinja_env.auto_reload = True
     app.config['TEMPLATES_AUTO_RELOAD'] = True
-    app.run(debug=True, port=1234)
+    app.run()
