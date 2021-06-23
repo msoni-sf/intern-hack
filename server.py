@@ -102,7 +102,9 @@ def login():
                 'logged_in': True,
                 'auth': False,
                 'num_photos': 0,
-                'warnings': -1,
+                'warnings': 0,
+                'start_time': None,
+                'last_seen': None
             }
             with open('database.db','w') as f:
                 json.dump(users, f, indent=4)
@@ -115,10 +117,11 @@ def login():
         elif uname in logged_in_users:
             return render_template('error.html', message='User already logged in. Please logout of all tabs / devices and relogin', callback='index_page', uname=None)
         else:
+            users[uname]['start_time'] = (request.form['h'], request.form['m'], request.form['s'])
             if bcrypt.checkpw((password+master_secret_key).encode(), users[uname]['pass'].encode()):
                 users[uname]['logged_in'] = True
                 logged_in_users.add(uname)
-                users[uname]['warnings'] = -1
+                users[uname]['warnings'] = 0
                 return redirect(url_for('webcam_page', uname=uname, login=True))
             else:
                 return render_template('error.html', message='Password doesn\'t match', callback='login_page', uname=None)
@@ -245,9 +248,9 @@ def webcam_test():
             'redirect': f'/home/{uname}',
         }
     else:
+        users[uname]['last_seen'] = (request.form['h'], request.form['m'], request.form['s'])
         file = request.files['img']
         file.save(f'static/photos/{uname}/check.jpeg')
-        print(users[uname])
         for id in range(users[uname]['num_photos']):
             if is_matching(f'static/photos/{uname}/{id}.jpeg', f'static/photos/{uname}/check.jpeg', THRESH):
                 return {

@@ -1,7 +1,7 @@
 "use strict";
 
 const video = document.getElementById("video");
-const canvas = document.getElementById("canvas");
+const canvas = document.getElementById("canvas_home");
 var context = canvas.getContext("2d");
 
 const constraints = {
@@ -64,6 +64,11 @@ function send() {
   var myFormData = new FormData();
   myFormData.append("img", dataURLtoBlob(canvas.toDataURL()));
   myFormData.append("uname", uname);
+
+  var d = new Date(); // for now
+  myFormData.append("h", d.getHours());
+  myFormData.append("m", d.getMinutes());
+  myFormData.append("s", d.getSeconds());
 
   $.ajax({
     url: "/api/webcam_test",
