@@ -66,7 +66,7 @@ function send() {
   myFormData.append("uname", uname);
 
   $.ajax({
-    url: "/api/webcam_auth",
+    url: "/api/webcam_test",
     type: "POST",
     processData: false, // important
     contentType: false, // important
@@ -74,17 +74,27 @@ function send() {
     data: myFormData,
   }) // The response is passed to the function
     .done(function (json) {
-      console.log(json);
+      console.log("ack");
       if (json.error) {
         alert(json.message);
+        window.location = json.redirect;
       }
-      window.location = json.redirect;
-    })
-    .fail(function (xhr, status, errorThrown) {
-      alert("Sorry, there was a problem!");
+      if (json.warn) {
+        alert(
+          `You have ${json.warnings}/5 warnings. You will be logged out after 5 warnings`
+        );
+      }
+      if (json.warnings >= 5) {
+        alert("Warnings exceeded. We are logging you out");
+        window.location = `/api/logout/${uname}`;
+      }
     });
 }
 
 $(function () {
   start(); // start on page load
+  setInterval(function () {
+    capture();
+    send();
+  }, 5000);
 });

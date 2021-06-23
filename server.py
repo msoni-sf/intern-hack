@@ -102,6 +102,7 @@ def login():
                 'logged_in': True,
                 'auth': False,
                 'num_photos': 0,
+                'warnings': -1,
             }
             with open('database.db','w') as f:
                 json.dump(users, f, indent=4)
@@ -117,6 +118,7 @@ def login():
             if bcrypt.checkpw((password+master_secret_key).encode(), users[uname]['pass'].encode()):
                 users[uname]['logged_in'] = True
                 logged_in_users.add(uname)
+                users[uname]['warnings'] = -1
                 return redirect(url_for('webcam_page', uname=uname, login=True))
             else:
                 return render_template('error.html', message='Password doesn\'t match', callback='login_page', uname=None)
@@ -230,6 +232,43 @@ def get_images(uname):
     for id in range(users[uname]['num_photos']):
         encoded_imges.append(get_response_image(f'static/photos/{uname}/{id}.jpeg'))
     return jsonify({'result': encoded_imges})
+
+@app.route('/api/webcam_test', methods=['POST'])
+def webcam_test():
+    uname = request.form['uname']
+    if uname not in users:
+        return {
+            'error': True,
+            'warnings': 0,
+            'warn': False,
+            'message': 'User does not exist',
+            'redirect': f'/home/{uname}',
+        }
+    else:
+        file = request.files['img']
+        file.save(f'static/photos/{uname}/check.jpeg')
+        print(users[uname])
+        for id in range(users[uname]['num_photos']):
+            if is_matching(f'static/photos/{uname}/{id}.jpeg', f'static/photos/{uname}/check.jpeg', THRESH):
+                return {
+                    'error': False,
+                    'message': '',
+                    'warnings': users[uname]['warnings'],
+                    'warn': False,
+                    'redirect': f'/home/{uname}',
+                }
+
+        users[uname]['warnings'] += 1
+        with open('database.db','w') as f:
+            json.dump(users, f, indent=4)
+
+        return {
+            'error': False,
+            'message': '',
+            'warn': True,
+            'warnings': users[uname]['warnings'],
+            'redirect': '/',
+        }
 
 ## Run server
 if __name__ == '__main__':

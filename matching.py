@@ -11,8 +11,15 @@ def is_matching(img1, img2, thresh):
     image_1 = face_recognition.load_image_file(img1)
     image_2 = face_recognition.load_image_file(img2)
 
-    image_1_encoding = face_recognition.face_encodings(image_1)[0]
-    image_2_encoding = face_recognition.face_encodings(image_2)[0]
+
+    image_1_encoding = face_recognition.face_encodings(image_1)
+    image_2_encoding = face_recognition.face_encodings(image_2)
+
+    if len(image_1_encoding) == 0 or len(image_2_encoding) == 0:
+        return False
+    else:
+        image_1_encoding = image_1_encoding[0]
+        image_2_encoding = image_2_encoding[0]
 
     face_distance = face_recognition.face_distance([image_1_encoding], image_2_encoding)[0]
     print(face_distance)
